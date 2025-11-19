@@ -1,0 +1,96 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Currency {
+  PEN
+  USD
+}
+
+enum ValuationStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+}
+
+model Project {
+  id              Int           @id @default(autoincrement())
+  code            String        @unique
+  name           String
+  description    String?        // Descripción de la obra
+  clientName     String?        // Nombre del cliente
+  location       String?        // Ubicación de la obra
+  currency       Currency       @default(PEN)
+  contractAmount Decimal?       @db.Numeric(18,2)
+  startDate      DateTime?
+  endDate        DateTime?
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  budgetItems    BudgetItem[]
+  valuations     Valuation[]
+}
+
+model BudgetItem {
+  id             Int           @id @default(autoincrement())
+  projectId      Int
+  parentId       Int?          // Para jerarquía de capítulos
+  code           String
+  description    String
+  unit           String        // Unidad de medida
+  contractQty    Decimal       @db.Numeric(18,4)
+  unitPrice      Decimal       @db.Numeric(18,4)
+  contractAmount Decimal       @db.Numeric(18,2)
+
+  level          Int?          // Nivel en el árbol (opcional)
+  isHeader       Boolean       @default(false)
+  sortOrder      Int?          // Orden de impresión
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  project        Project       @relation(fields: [projectId], references: [id])
+  parent         BudgetItem?   @relation("BudgetItemToParent", fields: [parentId], references: [id])
+  children       BudgetItem[]  @relation("BudgetItemToParent")
+  valuationItems ValuationItem[]
+}
+
+model Valuation {
+  id           Int              @id @default(autoincrement())
+  projectId    Int
+  number       Int              // Número de valorización
+  label        String?          // Texto amigable
+  periodStart  DateTime
+  periodEnd    DateTime
+  status       ValuationStatus  @default(DRAFT)
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  project      Project          @relation(fields: [projectId], references: [id])
+  items        ValuationItem[]
+}
+
+model ValuationItem {
+  id             Int      @id @default(autoincrement())
+  valuationId    Int
+  budgetItemId   Int
+
+  qtyCurrent     Decimal @db.Numeric(18,4) // Metrado del periodo
+  unitPrice      Decimal @db.Numeric(18,4)
+  amountCurrent  Decimal @db.Numeric(18,2)
+
+  notes          String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  valuation      Valuation  @relation(fields: [valuationId], references: [id])
+  budgetItem     BudgetItem @relation(fields: [budgetItemId], references: [id])
+}

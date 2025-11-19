@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: valuations_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: valuations_db
+      POSTGRES_USER: valuations_user
+      POSTGRES_PASSWORD: valuations_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  api:
+    build: ./valuations-api
+    container_name: valuations_api
+    command: npm run start:dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      # Sobrescribe DATABASE_URL para que Prisma use el host "db"
+      DATABASE_URL: postgres://valuations_user:valuations_pass@db:5432/valuations_db
+    depends_on:
+      - db
+
+volumes:
+  db-data:
