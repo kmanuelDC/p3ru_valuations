@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: valuations_user
       POSTGRES_PASSWORD: valuations_pass
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
 
@@ -24,7 +24,7 @@ services:
       - .env
     environment:
       # Sobrescribe DATABASE_URL para que Prisma use el host "db"
-      DATABASE_URL: postgres://valuations_user:valuations_pass@db:5432/valuations_db
+      DATABASE_URL: postgres://valuations_user:valuations_pass@db:5435/valuations_db
     depends_on:
       - db
 

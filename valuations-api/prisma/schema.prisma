@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgres://valuations_user:valuations_pass@localhost:5435/valuations_db?schema=public"
 }
 
 generator client {
@@ -26,7 +26,7 @@ model Project {
   clientName     String?        // Nombre del cliente
   location       String?        // Ubicación de la obra
   currency       Currency       @default(PEN)
-  contractAmount Decimal?       @db.Numeric(18,2)
+  contractAmount Decimal?       @db.Decimal(18,2)
   startDate      DateTime?
   endDate        DateTime?
 
@@ -44,9 +44,9 @@ model BudgetItem {
   code           String
   description    String
   unit           String        // Unidad de medida
-  contractQty    Decimal       @db.Numeric(18,4)
-  unitPrice      Decimal       @db.Numeric(18,4)
-  contractAmount Decimal       @db.Numeric(18,2)
+  contractQty    Decimal       @db.Decimal(18,4)
+  unitPrice      Decimal       @db.Decimal(18,4)
+  contractAmount Decimal       @db.Decimal(18,2)
 
   level          Int?          // Nivel en el árbol (opcional)
   isHeader       Boolean       @default(false)
@@ -82,9 +82,9 @@ model ValuationItem {
   valuationId    Int
   budgetItemId   Int
 
-  qtyCurrent     Decimal @db.Numeric(18,4) // Metrado del periodo
-  unitPrice      Decimal @db.Numeric(18,4)
-  amountCurrent  Decimal @db.Numeric(18,2)
+  qtyCurrent     Decimal @db.Decimal(18,4) // Metrado del periodo
+  unitPrice      Decimal @db.Decimal(18,4)
+  amountCurrent  Decimal @db.Decimal(18,2)
 
   notes          String?
 

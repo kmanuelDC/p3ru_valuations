@@ -7,6 +7,6 @@ export default defineConfig({
   },
   engine: "classic",
   datasource: {
-    url: env("DATABASE_URL"),
+    url: "postgres://valuations_user:valuations_pass@localhost:5435/valuations_db?schema=public",
   },
 });
