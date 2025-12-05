@@ -9,48 +9,65 @@ generator client {
 
 enum Currency {
   PEN
-  USD
 }
 
-enum ValuationStatus {
+
+enum ProjectStatus {
   DRAFT
-  APPROVED
-  REJECTED
+  ACTIVE
+  CLOSED
+  ARCHIVED
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  passwordHash  String    // Password encriptado
+  fullName      String?   // Nombre completo del usuario
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  projects      Project[] // Proyectos que el usuario administra
 }
 
 model Project {
   id              Int           @id @default(autoincrement())
   code            String        @unique
-  name           String
-  description    String?        // Descripción de la obra
-  clientName     String?        // Nombre del cliente
-  location       String?        // Ubicación de la obra
-  currency       Currency       @default(PEN)
-  contractAmount Decimal?       @db.Decimal(18,2)
-  startDate      DateTime?
-  endDate        DateTime?
+  name            String
+  description     String?        // Descripción de la obra
+  clientName      String?        // Nombre del cliente
+  location        String?        // Ubicación de la obra
+  currency        Currency       @default(PEN)
+  contractAmount  Decimal?       @db.Decimal(18,2)
+  startDate       DateTime?
+  endDate         DateTime?
 
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  status          ProjectStatus  @default(ACTIVE)
 
-  budgetItems    BudgetItem[]
-  valuations     Valuation[]
+  ownerId         Int            // Usuario propietario/administrador principal
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  owner           User           @relation(fields: [ownerId], references: [id])
+  budgetItems     BudgetItem[]
+  valuations      Valuation[]
 }
 
 model BudgetItem {
   id             Int           @id @default(autoincrement())
   projectId      Int
-  parentId       Int?          // Para jerarquía de capítulos
+  parentId       Int?
   code           String
   description    String
-  unit           String        // Unidad de medida
+  unit           String
   contractQty    Decimal       @db.Decimal(18,4)
   unitPrice      Decimal       @db.Decimal(18,4)
   contractAmount Decimal       @db.Decimal(18,2)
-
-  level          Int?          // Nivel en el árbol (opcional)
+  level          Int?
   isHeader       Boolean       @default(false)
-  sortOrder      Int?          // Orden de impresión
+  sortOrder      Int?
 
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -64,11 +81,11 @@ model BudgetItem {
 model Valuation {
   id           Int              @id @default(autoincrement())
   projectId    Int
-  number       Int              // Número de valorización
-  label        String?          // Texto amigable
+  number       Int
+  label        String?
   periodStart  DateTime
   periodEnd    DateTime
-  status       ValuationStatus  @default(DRAFT)
+  status       ProjectStatus    @default(DRAFT)
 
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
@@ -78,19 +95,20 @@ model Valuation {
 }
 
 model ValuationItem {
-  id             Int      @id @default(autoincrement())
-  valuationId    Int
-  budgetItemId   Int
+  id            Int      @id @default(autoincrement())
+  valuationId   Int
+  budgetItemId  Int
 
-  qtyCurrent     Decimal @db.Decimal(18,4) // Metrado del periodo
-  unitPrice      Decimal @db.Decimal(18,4)
-  amountCurrent  Decimal @db.Decimal(18,2)
+  qtyCurrent    Decimal  @db.Decimal(18,4)
+  unitPrice     Decimal  @db.Decimal(18,4)
+  amountCurrent Decimal  @db.Decimal(18,2)
 
-  notes          String?
+  notes         String?
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  valuation      Valuation  @relation(fields: [valuationId], references: [id])
-  budgetItem     BudgetItem @relation(fields: [budgetItemId], references: [id])
+  valuation     Valuation  @relation(fields: [valuationId], references: [id])
+  budgetItem    BudgetItem @relation(fields: [budgetItemId], references: [id])
 }
+
