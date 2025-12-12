@@ -76,6 +76,7 @@ model BudgetItem {
   parent         BudgetItem?   @relation("BudgetItemToParent", fields: [parentId], references: [id])
   children       BudgetItem[]  @relation("BudgetItemToParent")
   valuationItems ValuationItem[]
+  @@unique([projectId, code])
 }
 
 model Valuation {
