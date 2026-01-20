@@ -32,10 +32,10 @@ services:
     build: ./valuations-web
     container_name: valuations_web
     ports:
-      - "4200:4200"
+      - "3001:3000"
     environment:
-      # Opcional: permite al frontend conocer la URL del API en contenedor
-      VITE_API_URL: http://api:3000
+      # Next.js: variable pública para la URL del API en Docker
+      NEXT_PUBLIC_API_URL: http://api:3000
     depends_on:
       - api
 
